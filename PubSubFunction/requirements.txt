@@ -1,0 +1,2 @@
+# Function dependencies
+google-cloud-pubsub==1.0.0
