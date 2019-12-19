@@ -80,11 +80,11 @@ def read_file(file):
             pos=re.search(linebrk,contents[lastpt:])
             if pos: #found the breaker
                 if before=='TRUE':
-                  splunkHec(contents[startpt:pos.start()+lastpt-1], objectname)
+                  splunkHec(contents[startpt:pos.start()+lastpt], objectname)
                   startpt=pos.start()+lastpt
                 else:
                   splunkHec(contents[startpt:pos.end()+lastpt], objectname)
-                  startpt=pos.end()+lastpt+1
+                  startpt=pos.end()+lastpt
                 lastpt=startpt+batch
             else: #didn't find, so must be at end
                 lastpt=content_length+1
