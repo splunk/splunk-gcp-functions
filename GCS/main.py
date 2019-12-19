@@ -1,4 +1,4 @@
-#GCSfunction v0.1.4
+#GCSfunction v0.1.5
 
 '''MIT License
 Copyright (c) 2019 Splunk
