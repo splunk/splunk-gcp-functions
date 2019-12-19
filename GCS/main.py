@@ -80,7 +80,6 @@ def read_file(file):
             pos=re.search(linebrk,contents[lastpt:])
             if pos: #found the breaker
                 if before=='TRUE':
-                  print(contents[startpt:pos.start()+lastpt-1])
                   splunkHec(contents[startpt:pos.start()+lastpt-1], objectname)
                   startpt=pos.start()+lastpt
                 else:
