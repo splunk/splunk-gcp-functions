@@ -1,4 +1,4 @@
-#RetryAll0.1.6.py
+#RetryAll0.1.7.py
 '''MIT License
 Copyright (c) 2019 Splunk
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,9 @@ def synchronous_pull(project_id, subscription_name):
 
 
 def splunkHec(url,token,logdata):
-  
+  #check for empty log
+  if len(logdata)==0:
+    return True #nothing to do with an empty log.
   #test for over-rides. All 3 over-ride variables must be available to over-ride.
   try:
     url_o = 'https://'+os.environ['HEC_URL']+'/services/collector'
