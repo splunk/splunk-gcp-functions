@@ -88,7 +88,7 @@ cd ../GCS
 gcloud functions deploy $GCS_FUNCTION --runtime python37 \
   --trigger-bucket=$GCS_ASSETS_BUCKET --entry-point=hello_gcs --timeout=120\
   --allow-unauthenticated \
-  --set-env-vars=HEC_URL=$HEC_URL,HEC_TOKEN=$ASSETS_TOKEN,PROJECTID=$MY_PROJECT,RETRY_TOPIC=$RETRY_TOPIC
+  --set-env-vars=HEC_URL=$HEC_URL,HEC_TOKEN=$ASSETS_TOKEN,PROJECTID=$MY_PROJECT,RETRY_TOPIC=$RETRY_TOPIC,LINE_BREAK='{"name":"//'
 
 
 #This is a common section for all examples
