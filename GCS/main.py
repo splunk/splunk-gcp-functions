@@ -71,7 +71,7 @@ def read_file(file):
           linebrk='\n'
         try:
           before=os.environ['BEFORE']    #non-mandatory env variable. Default is to break after
-          if (before!='TRUE') or (before!='FALSE'): #validate - default to after if not TRUE or FALSE
+          if before not in ['TRUE','FALSE']: #validate - default to after if not TRUE or FALSE
             before='FALSE'
         except:
           before='FALSE'
@@ -80,8 +80,9 @@ def read_file(file):
             pos=re.search(linebrk,contents[lastpt:])
             if pos: #found the breaker
                 if before=='TRUE':
-                  splunkHec(contents[startpt:pos.start()+lastpt], objectname)
-                  startpt=pos.start()+lastpt+1
+                  print(contents[startpt:pos.start()+lastpt-1])
+                  splunkHec(contents[startpt:pos.start()+lastpt-1], objectname)
+                  startpt=pos.start()+lastpt
                 else:
                   splunkHec(contents[startpt:pos.end()+lastpt], objectname)
                   startpt=pos.end()+lastpt+1
