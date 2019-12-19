@@ -1,4 +1,4 @@
-#GCSfunction v0.1.3
+#GCSfunction v0.1.4
 
 '''MIT License
 Copyright (c) 2019 Splunk
@@ -78,16 +78,18 @@ def read_file(file):
         
         while lastpt<=content_length:
             pos=re.search(linebrk,contents[lastpt:])
-            if before=='TRUE':
-              splunkHec(contents[startpt:pos.start()+lastpt], objectname)
-              startpt=pos.start()+lastpt+1
-            else:
-              splunkHec(contents[startpt:pos.end()+lastpt], objectname)
-              startpt=pos.end()+lastpt+1
+            if pos: #found the breaker
+                if before=='TRUE':
+                  splunkHec(contents[startpt:pos.start()+lastpt], objectname)
+                  startpt=pos.start()+lastpt+1
+                else:
+                  splunkHec(contents[startpt:pos.end()+lastpt], objectname)
+                  startpt=pos.end()+lastpt+1
+                lastpt=startpt+batch
+            else: #didn't find, so must be at end
+                lastpt=content_length+1
 
-            lastpt=startpt+batch
-
-    if lastpt>content_length:
+    if lastpt>content_length: #flush remainder
         splunkHec(contents[startpt:],objectname)
 
 
