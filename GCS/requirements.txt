@@ -1,3 +1,4 @@
 # Function dependencies
 
 google-cloud-storage==1.19.1
+google-cloud-pubsub==1.0.0
