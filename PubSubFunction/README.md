@@ -6,4 +6,4 @@ This function pulls any event that is posted into PubSub and packages it up into
 If any faiures occur during sending the message to HEC, the event is posted back to a Pub-Sub Topic. A recovery function is provided which is executed via a Cloud Scheduler trigger (PubSub). The recovery function will attempt to clear out the PubSub retry topic and send these events into HEC.
 
 
-![PubSub Function overview](../images/PubSub.png)
+![PubSub Function overview](https://github.com/splunk/splunk-gcp-functions/tree/master/images/PubSub.png)
