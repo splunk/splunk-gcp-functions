@@ -60,8 +60,6 @@ def read_file(file):
       return
     startpt = 0
     lastpt = batch
-    message_count=0
-    message_content=''
     content_length = len(contents)
     
     if content_length>batch:
