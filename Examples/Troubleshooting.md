@@ -23,7 +23,7 @@ Another possibilty is that your log export filter is too broad, and the number o
 **My metrics has a gap between groups of metrics in Splunk**
 
 This is normally caused by the Metrics Schedule and the Interval setting (TIME_INTERVAL) for the Metrics functions not being the same. For example, the schedule is 10mins whereas the metrics interval is 5. The TIME_INTERVAL setting should match that of the Schedule period.
-If the settings are the same, then examine the function log and search for errors - if you see function timeouts or memory limit exceeded, this indicates that you need to increase the memory allocated to the function and function timeout. Alternatively, reduce the time interval, and the number of metrics for the function (for example, split the list over more than one function).
+If the settings are the same, then examine the function log and search for errors - if you see function timeouts or memory limit exceeded, this indicates that you need to increase the memory allocated to the function and function timeout (usually due to a large number of metrics being requested). Alternatively, reduce the time interval, and the number of metrics for the function (for example, split the list over more than one function).
 
 **I have no metrics arriving in Splunk**
 
