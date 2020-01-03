@@ -1,4 +1,4 @@
-#GCP - PubSubFunction v0.1.9
+#GCP - PubSubFunction v0.1.10
 
 '''MIT License
 Copyright (c) 2019 Splunk
@@ -41,7 +41,7 @@ def hello_pubsub(event, context):
     now_time = round(time.time(),3)
     pubsub_message = base64.b64decode(event['data']).decode('utf-8')
 
-    timestamp_srt=pubsub_message.find('},"timestamp":"')+15
+    timestamp_srt=pubsub_message.find(',"timestamp":"')+14
     timestamp_end=len(pubsub_message)-2
     timestamp=pubsub_message[timestamp_srt:timestamp_end]
 
