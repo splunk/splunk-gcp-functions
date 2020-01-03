@@ -107,13 +107,13 @@ gcloud functions deploy $PUBSUB_FUNCTION --runtime python37 \
 
 gcloud pubsub topics create $RETRY_TOPIC
 
-gcloud pubsub subscriptions create --topic $RETRY_TOPIC $RETRY_SUBSCRIPTION
+gcloud pubsub subscriptions create --topic $RETRY_TOPIC $RETRY_SUBSCRIPTION --ack-deadline=30
 cd ../Retry
 
 #create Retry function
 
 gcloud functions deploy $RETRY_FUNCTON --runtime python37 \
- --trigger-topic=$RETRY_TRIGGER_PUBSUB --entry-point=hello_pubsub --allow-unauthenticated --timeout=120\
+ --trigger-topic=$RETRY_TRIGGER_PUBSUB --entry-point=hello_pubsub --allow-unauthenticated --timeout=240\
  --set-env-vars=PROJECTID=$MY_PROJECT,SUBSCRIPTION=$RETRY_SUBSCRIPTION
 
 gcloud pubsub topics create $RETRY_TRIGGER_PUBSUB

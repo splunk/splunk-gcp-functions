@@ -47,7 +47,8 @@ Default is original message Token. Do not set if you wish to keep original desti
 <br>EVENT : use this for Metrics going into Event index
 <br>RAW : use this for GCS Function re-try. 
 <br>Do not set this value if not over-riding destination</td></tr>
-<tr><td>BATCH</td><td>Number of events to pull from Retry PubSub in one call. Note that higher numbers here will result in a higher execution time if there are significant number of events to pull from the topic. Take care not to set this too high, or adjust the function timeout to accomodate.<br>Default = 300</td></tr>
+<tr><td>BATCH</td><td>Number of events to pull from Retry PubSub in one call. Note that higher numbers here will potentially result in a higher execution time. Take care not to set this too high - you may need to make the pubsub subcription timeout higher if it is set to a large number (>200) and also adjust the function timeout to accomodate. General guidance is the function can recall approx 300 pub/sub events in a 2 minute function call.<br>Default = 100</td></tr>
+<tr><td>TIMEOUT</td><td>Time in seconds for the function to stop pulling from Retry PubSub in one call (unless there are no events to retry). Note that if this is set higher than the function timeout, the function potentially will exit with a timeout - this could also result in some messages being sent more than once to Splunk. Guideance is to be same value as function timeout. Note: To avoid function timeouts where possible, the actual max execution will generally aim to be a few seconds less than the value set here.<br>Default = 220</td></tr>
 </table>
 
 

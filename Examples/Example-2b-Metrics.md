@@ -84,7 +84,7 @@ gcloud functions deploy $METRICS_FUNCTION --runtime python37 \
 
 gcloud pubsub topics create $RETRY_TOPIC
 
-gcloud pubsub subscriptions create --topic $RETRY_TOPIC $RETRY_SUBSCRIPTION
+gcloud pubsub subscriptions create --topic $RETRY_TOPIC $RETRY_SUBSCRIPTION --ack-deadline=30
 cd ../Retry
 
 #create Retry function

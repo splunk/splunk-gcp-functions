@@ -1,4 +1,4 @@
-#RetryAll0.1.7.py
+#RetryAll0.1.8.py
 '''MIT License
 Copyright (c) 2019 Splunk
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,20 @@ def hello_pubsub(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    
+    try:
+        TIMEOUT=int(os.environ['TIMEOUT'])-20
+    except:
+        TIMEOUT=220 #default max timeout for pulling from pub-sub. 
+        
+    startTime = time.time()
+
     messageCount=1
     while messageCount!=0:
         try:
             messageCount=synchronous_pull(os.environ['PROJECTID'],os.environ['SUBSCRIPTION'])
         except:
+            messageCount=0
+        if (time.time()-startTime)>TIMEOUT:
             messageCount=0
 
 def synchronous_pull(project_id, subscription_name):
@@ -40,9 +48,9 @@ def synchronous_pull(project_id, subscription_name):
     from google.cloud import pubsub_v1
 
     try:
-        NUM_MESSAGES=os.environ['BATCH']
+        NUM_MESSAGES=int(os.environ['BATCH'])
     except:
-        NUM_MESSAGES=300 #default pull from pub-sub
+        NUM_MESSAGES=100 #default pull from pub-sub
 
     subscriber = pubsub_v1.SubscriberClient()
     subscription_path = subscriber.subscription_path(project_id, subscription_name)
