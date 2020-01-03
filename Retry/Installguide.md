@@ -35,6 +35,7 @@ Create a Cloud Schedule, triggering the Retry PubSub Topic. Schedule this for ho
 <table><tr><td><strong>Variable</strong></td><td><strong>Value</strong></td></tr>
 <tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
 <tr><td>SUBSCRIPTION</td><td>Name of the subscription that pulls from the Retry/Error PubSub Topic.</td></tr>
+<tr><td>RETRY_TRIGGER_TOPIC</td><td>Name of the Retry Trigger Topic that triggers the function. Used to spawn more re-tries.</td></tr>
 <tr><td>HEC_URL</td><td>OVER-RIDE Hostname/IP address and port number for URL for Splunk HEC (Load balancer required for cluster)
 e.g. mysplunkinstance.splunk.com:8088 or 113.114.115.192:8088
 This will point the destination of the message to a different URL to the originating message
@@ -47,7 +48,7 @@ Default is original message Token. Do not set if you wish to keep original desti
 <br>EVENT : use this for Metrics going into Event index
 <br>RAW : use this for GCS Function re-try. 
 <br>Do not set this value if not over-riding destination</td></tr>
-<tr><td>BATCH</td><td>Number of events to pull from Retry PubSub in one call. Note that higher numbers here will potentially result in a higher execution time. Take care not to set this too high - you may need to make the pubsub subcription Acknowledgement deadline for the retry topic higher if this is set to a large number (>200) and also adjust the function timeout to accomodate. General guidance is the function can recall approx 300-400 pub/sub events in a 3 minute function call with a 256M Function allocation. <br>Default = 100</td></tr>
+<tr><td>BATCH</td><td>Number of events to pull from Retry PubSub in one call. Note that higher numbers here will potentially result in a higher execution time. Take care not to set this too high - you may need to make the pubsub subcription Acknowledgement deadline for the retry topic higher if this is set to a large number (>200) and also adjust the function timeout to accomodate. General guidance is the function can recall approx 8000 pubsub events in 10 minutes function call with a 256M Function allocation (multiple spawned functions)<br>Default = 100</td></tr>
 <tr><td>TIMEOUT</td><td>Time in seconds for the function to stop pulling from Retry PubSub in one call (unless there are no events to retry). Note that if this is set higher than the function timeout, the function potentially will exit with a timeout - this could also result in some messages being sent more than once to Splunk. Guideance is to be same value as function timeout. Note: To avoid function timeouts where possible, the actual max execution will generally aim to be a few seconds less than the value set here.<br>Default = 240 </td></tr>
 </table>
 
@@ -68,7 +69,7 @@ git clone https://github.com/pauld-splunk/splunk-gcp-functions.git
 
 cd splunk-gcp-functions/Retry
 
-gcloud functions deploy **myRetryEventFunction** --runtime python37 --trigger-topic=**RETRY_TRIGGER_TOPIC** --entry-point=hello_pubsub --allow-unauthenticated --timeout=120 --set-env-vars=PROJECTID='**Project-id**',SUBSCRIPTION='**Retry_PubSub_Subscription**'
+gcloud functions deploy **myRetryEventFunction** --runtime python37 --trigger-topic=**RETRY_TRIGGER_TOPIC** --entry-point=hello_pubsub --allow-unauthenticated --timeout=120 --set-env-vars=PROJECTID='**Project-id**',SUBSCRIPTION='**Retry_PubSub_Subscription**',RETRY_TRIGGER_TOPIC='**RETRY_TRIGGER_TOPIC**'
 
 ** *Update the bold values with your own settings* **
 

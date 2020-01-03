@@ -172,7 +172,7 @@ def errorHandler(logdata,source,url,token):
 
     
     data = logdata.encode('utf-8')
-    # Add two attributes, origin and username, to the message
+    # Add url, token and source attributes to the message
     future = publisher.publish(topic_path, data, url=url, token=token, origin=source, source='gcpSplunkPubSubFunction')
    
 

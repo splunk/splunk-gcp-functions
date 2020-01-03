@@ -1,4 +1,4 @@
-#RetryAll0.1.8.py
+#RetryAll0.1.9.py
 '''MIT License
 Copyright (c) 2019 Splunk
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
@@ -32,15 +32,18 @@ def hello_pubsub(event, context):
         TIMEOUT=240 #default max timeout for pulling from pub-sub. 
         
     startTime = time.time()
-
     messageCount=1
+    spawned=0
     while messageCount!=0:
         try:
             messageCount=synchronous_pull(os.environ['PROJECTID'],os.environ['SUBSCRIPTION'])
         except:
             messageCount=0
-        if (time.time()-startTime)>TIMEOUT-20:
+        if (time.time()-startTime)>TIMEOUT:
             messageCount=0
+        if (messageCount>0) and (spawned==0):
+            retrypushHandler()
+            spawned=1 #only fire another retry once
 
 def synchronous_pull(project_id, subscription_name):
     """Pulling messages synchronously."""
@@ -67,7 +70,7 @@ def synchronous_pull(project_id, subscription_name):
         tok=received_message.message.attributes["token"]
         url=received_message.message.attributes["url"]  
         #send to HEC
-        if splunkHec(url,tok,received_message.message.data.decode(encoding="utf-8")): #successful write to HEC
+        if splunkHec(url,tok,received_message.message.data): #successful write to HEC
             #keep track of succesful messages
             ack_ids.append(received_message.ack_id)
             outcount=outcount+1
@@ -116,7 +119,7 @@ def splunkHec(url,token,logdata):
   authHeader = {'Authorization': 'Splunk '+ token}
 
   try:
-    r = s.post(url, headers=authHeader, data=logdata.encode("utf-8"), verify=False, timeout=2)
+    r = s.post(url, headers=authHeader, data=logdata, verify=False, timeout=2)
     r.raise_for_status()
   except requests.exceptions.HTTPError as errh:
     print ("Http Error:",errh)
@@ -133,4 +136,17 @@ def splunkHec(url,token,logdata):
     print ("Error: ",err)
     return False
   return True
+
+
+def retrypushHandler():
+    """Publishes a message to Pub/Sub topic to fire another Retry"""
+
+    from google.cloud import pubsub_v1
+    
+    print('spawning another handler')
+    project_id = os.environ['PROJECTID']
+    topic_name = os.environ['RETRY_TRIGGER_TOPIC']
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project_id, topic_name)
+    future = publisher.publish(topic_path, 'SelfSpawn'.encode("utf-8"))
         
