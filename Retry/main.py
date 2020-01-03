@@ -27,9 +27,9 @@ def hello_pubsub(event, context):
          context (google.cloud.functions.Context): Metadata for the event.
     """
     try:
-        TIMEOUT=int(os.environ['TIMEOUT'])-20
+        TIMEOUT=int(os.environ['TIMEOUT'])
     except:
-        TIMEOUT=220 #default max timeout for pulling from pub-sub. 
+        TIMEOUT=240 #default max timeout for pulling from pub-sub. 
         
     startTime = time.time()
 
@@ -39,7 +39,7 @@ def hello_pubsub(event, context):
             messageCount=synchronous_pull(os.environ['PROJECTID'],os.environ['SUBSCRIPTION'])
         except:
             messageCount=0
-        if (time.time()-startTime)>TIMEOUT:
+        if (time.time()-startTime)>TIMEOUT-20:
             messageCount=0
 
 def synchronous_pull(project_id, subscription_name):
