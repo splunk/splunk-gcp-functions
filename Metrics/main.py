@@ -1,4 +1,4 @@
-#GCPMetricsFunction v0.5.10
+#GCPMetricsFunction v0.7.0
 #All-in-one metrics function
 
 '''MIT License
@@ -20,6 +20,9 @@ import pprint
 import time
 import json
 import re
+import threading
+from threading import Thread
+from queue import Queue
 
 from google.cloud import monitoring_v3
 from datetime import datetime
@@ -34,6 +37,15 @@ import urllib3
 urllib3.disable_warnings()
 
 
+#threadsafe HEC Events list
+class HECMessages:
+    def __init__(self):
+        self.HECevents = []
+        self._lock = threading.Lock()
+
+    def locked_update(self, HECevent):     
+        with self._lock:
+            self.HECevents.append(HECevent) 
 
 """Triggered from a message on a Cloud Pub/Sub topic.
     Args:
@@ -46,64 +58,114 @@ def hello_pubsub(event, context):
     
     HEC_Pack_size=20    # number of events per http post to HEC. Max size = 5MB by default on HEC
     now = time.time()
-    HECevents=[]
+    #HECevents=[]
+    HECevents=HECMessages() #create threadsafe message list
+    
     metricslist=json.loads(os.environ['METRICS_LIST'])
     try:
         payloadType=os.environ['METRIC_INDEX_TYPE']
     except:
         payloadType='EVENT'
     #print(metricslist)
-
-    payloads={}
-    payload={}
+    
+    workers=len(metricslist)
+    if workers>8:
+        workers=8
+        
+    metricsq=Queue()
+    for x in range(workers):
+        worker = BuilderThreadWorker(metricsq)
+        # Set as daemon thread 
+        worker.daemon = True
+        worker.start()
 
     for metric in metricslist:
-        
-        one_time_series = list_time_series(os.environ['PROJECTID'], metric, now, int(os.environ['TIME_INTERVAL']))
+        metricsq.put((metric, now, HECevents,payloadType))
 
-        source=os.environ['PROJECTID']+':'+metric
-        
-        
-        for data in one_time_series:
-    
-            pointsStrList=str(data.points)
-            
-            strdata=str(data)
-            metricKindPart=get_metric_kind(strdata)
-            valueTypePart=get_value_type(strdata)    
-            metricPart=str(data.metric)
-            resourcePart=str(data.resource)
-
-            pointsList=pullPointsList(pointsStrList)                    
-            resourcePart=pull_labels(resourcePart,'"resource":{',1,1) 
-            metricPart=pull_labels(metricPart,'"metric":{',1,1)
-
-            numPoints=len(pointsList)/3
-            ix=0
-            while ix<numPoints:
-                if pointsList[ix,2]!="-":     #ignore distributions with no values
-                    getevent = makeEvent(source,metricPart,resourcePart,metricKindPart,valueTypePart,pointsList[ix,0],pointsList[ix,1],pointsList[ix,2],now,payloadType)                
-                ix=ix+1
-                if getevent!='NULL':
-                    HECevents.append(getevent)
+    #wait for all of the builds to complete
+    metricsq.join()    
     
     message_counter=0
     package=''
     flushed=0
-    for events in HECevents:
+    
+    workers=int(round(len(HECevents.HECevents)/HEC_Pack_size))
+    queue = Queue()
+    threadcount=10
+    if workers<threadcount:
+        threadcount=workers
+    # Create (max) 10 worker threads (no need to thread more than number of packages)
+    for x in range(threadcount):
+        worker = HECThreadWorker(queue)
+        # Set as daemon thread 
+        worker.daemon = True
+        worker.start()
+    
+    for events in HECevents.HECevents:
         package=package+events
         message_counter+=1
         if message_counter>HEC_Pack_size:
-            splunkHec(package);
+            #splunkHec(package);
+            queue.put(package)
             message_counter=0;
             package=''
     
     if len(package)>0:
-        splunkHec(package);     
-
+        #splunkHec(package);
+        queue.put(package)
     
+    # wait for the queue to finish processing all the tasks
+    queue.join() 
 
 
+class BuilderThreadWorker(Thread):
+
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            # Get the parameters from the queue and expand the queue
+            metric, now, HECevents,payloadType = self.queue.get()
+            try:
+                MetricBuilder(metric, now, HECevents,payloadType)
+            finally:
+                self.queue.task_done()
+                
+def MetricBuilder(metric,now,HECevents,payloadType):
+    one_time_series = list_time_series(os.environ['PROJECTID'], metric, now, int(os.environ['TIME_INTERVAL']))
+
+    source=os.environ['PROJECTID']+':'+metric
+        
+        
+    for data in one_time_series:
+    
+        pointsStrList=str(data.points)
+            
+        strdata=str(data)
+        metricKindPart=get_metric_kind(strdata)
+        valueTypePart=get_value_type(strdata)    
+        metricPart=str(data.metric)
+        resourcePart=str(data.resource)
+
+        pointsList=pullPointsList(pointsStrList)                    
+        resourcePart=pull_labels(resourcePart,'"resource":{',1,1) 
+        metricPart=pull_labels(metricPart,'"metric":{',1,1)
+
+        numPoints=len(pointsList)/3
+        ix=0
+        getevent='NULL'
+        while ix<numPoints:
+            if pointsList[ix,2]!="-":     #ignore distributions with no values
+                getevent = makeEvent(source,metricPart,resourcePart,metricKindPart,valueTypePart,pointsList[ix,0],pointsList[ix,1],pointsList[ix,2],now,payloadType)
+            else:
+                getevent='NULL'
+            ix=ix+1
+            if getevent!='NULL':
+                HECevents.locked_update(getevent)
+
+                
 def makeEvent(source,metric,resource,metrickind,valuetype,points,timevalue,value,now,payloadType):
 
     try:
@@ -179,7 +241,7 @@ def list_time_series(project_id, metric_type, now_time, timelength):
     interval.end_time.seconds = int(now)
     interval.end_time.nanos = int(
         (now - interval.end_time.seconds) * 10**9)
-    interval.start_time.seconds = int(now - timelength*60) - 180 #1200)
+    interval.start_time.seconds = int(now - timelength*60) - 180
     interval.start_time.nanos = interval.end_time.nanos
     metric_string = 'metric.type = ' + '"'+metric_type+'"'
 
@@ -329,6 +391,21 @@ def getDistribution(in_str):
     return in_str
 
 
+class HECThreadWorker(Thread):
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+
+    def run(self):
+        while True:
+            # Get the log from the queue
+            logdata = self.queue.get()
+            try:
+                splunkHec(logdata)
+            finally:
+                self.queue.task_done()
+
+
 def splunkHec(logdata):
   #post to HEC
   url = 'https://'+os.environ['HEC_URL']
@@ -350,7 +427,7 @@ def splunkHec(logdata):
   authHeader = {'Authorization': 'Splunk '+ token}
   
   try:
-    r = s.post(url, headers=authHeader, data=logdata.encode("utf-8"), verify=False, timeout=2)
+    r = s.post(url, headers=authHeader, data=logdata, verify=False, timeout=2)
     r.raise_for_status()
   except requests.exceptions.HTTPError as errh:
     print ("Http Error:",errh)
