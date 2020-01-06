@@ -41,7 +41,7 @@ def hello_pubsub(event, context):
         try:
             messageCount=synchronous_pull(os.environ['PROJECTID'],os.environ['SUBSCRIPTION'])
         except:
-        #    messageCount=0
+            messageCount=0
         if (time.time()-startTime)>TIMEOUT:
             messageCount=0
         if (messageCount>0) and (spawned==0):
