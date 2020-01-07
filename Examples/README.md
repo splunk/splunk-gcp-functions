@@ -7,6 +7,8 @@ To run the examples, you can either run directly from the Cloud Shell in the GCP
 
 Make sure you have installed git on the host running the example scripts (GCP's Cloud Shell already has this installed).
 
+Please refer to the individual function documentation for any pre-requisites before running the examples.
+
 ## Example 1: PubSub 
 
 This example will create 2 example Log Export Sinks, 2 PubSub Topics and use the PubSub Function with a Retry Function. A Cloud Schedule is also created to trigger the Retry Function (via PubSub Topic). Note that this Schedule and Topic is common between all of examples and doesn't need to be repeated if you build more than one example.

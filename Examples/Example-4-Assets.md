@@ -28,8 +28,11 @@ Note: This function requires Cloud Assets API to be enabled on the Project you w
 ## CLI Example Scripts
 (run in bash or the Cloud Shell)
 
-**Note that you will need to change values in bold in the scripts below to identify your project id, HEC URL, token and GCS Bucket **
+**Note that you will need to change values in bold in the scripts below to identify your project id, HEC URL, token and GCS Bucket**
 You can also change the OS environment variables in the first section to fit your needs
+Note to use your Project ID, and not Project Name / Number
+
+When running the scripts the first time in a new project, if asked, accept the queries to create/initialise services
 
 <pre>
 
