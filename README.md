@@ -32,13 +32,15 @@ This function periodically requests any failed events that were sent to a PubSub
 
 ## Getting started
 
-The Functions library here has a set of Examples for each of the Functions. The examples contains scripts that can be executed to create a sample function and its components such as PubSub topics. This is a great place to start to understand how these functions work, and how to set them up in your environment.
+The Functions library here has a set of pre-defined Examples for each of the Functions (contained in the Examples folder in this repo). The examples contains scripts that can be executed to create a sample function and its components such as PubSub topics. This is a great place to start to understand how these functions work, and how to set them up in your environment.
 
 Note that the examples have a common retry function/configuration. This section will only need to be run once. In a similar way, the two metrics examples have a common trigger that can be reused for both examples.
 
 To run the examples, you can either run directly from the Cloud Shell in the GCP console (click **>_** to activate Cloud Shell), or by downloading the SDK or Quickstart onto your host/local machine (see here - https://cloud.google.com/sdk/install)
 
 Make sure you have installed git on the host running the example scripts (GCP's Cloud Shell already has this installed).
+
+You will need a Splunk instance that has a public facing URL for HEC.
 
 ## Troubleshooting
 
