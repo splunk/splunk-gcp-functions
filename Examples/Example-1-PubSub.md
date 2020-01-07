@@ -68,7 +68,7 @@ gcloud logging sinks create $PUBSUB_SINK1 \
   --log-filter="resource.labels.function_name!=$PUBSUB_FUNCTION"
 
 gcloud logging sinks describe $PUBSUB_SINK1 > tmp.txt
-LOG_SINK_SERVICE_ACCOUNT="$(cat tmp.txt |grep -o "serviceAccount:\S[[:digit:]]+-[[:digit:]]+@[[:print:]]+")"
+LOG_SINK_SERVICE_ACCOUNT="$(cat tmp.txt |grep -Eo "serviceAccount:\S[[:digit:]]+-[[:digit:]]+@[[:print:]]+")"
 rm tmp.txt
 
 #the last command will return the LOG_SINK_SERVICE_ACCOUNT 
