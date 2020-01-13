@@ -56,7 +56,7 @@ def read_file(file):
       contents = blob.download_as_string().decode("utf-8")
     except:
       #exception happens when partial uploads/file not complete. Drop out of the function gracefully
-      print('not sent to Splunk - incomplete upload')
+      print('Info: Nothing sent to Splunk yet - incomplete file upload into GCS')
       return
     startpt = 0
     lastpt = batch
