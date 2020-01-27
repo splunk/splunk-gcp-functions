@@ -33,7 +33,7 @@ Metrics Function requires the Retry Function.
 
 (run in bash or the Cloud Shell)
 
-git clone https://github.com/pauld-splunk/splunk-gcp-functions.git
+git clone https://github.com/splunk/splunk-gcp-functions.git
 
 cd splunk-gcp-functions/Metrics
 
