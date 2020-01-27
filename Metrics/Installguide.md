@@ -93,7 +93,8 @@ If a CLI is used for this function, the configuration for the environment variab
 
 ## Example Metrics lists
 
-There are a significant number of metrics available from GCP. The example (Metrics 2a and 2b) will set up a simple list of compute metrics, but the Function environment variables can be edited to include many more. Here are some samples that can be used for the METRICS_LIST variable:
+There are a significant number of metrics available from GCP. The example (Metrics 2a and 2b) will set up a simple list of compute metrics, but the Function environment variables can be edited to include many more. For a full list of metrics, have a look at the google cloud documentation here: https://cloud.google.com/monitoring/api/metrics_gcp 
+Here are some samples that can be used for the METRICS_LIST variable:
 
 ### Compute:
 
