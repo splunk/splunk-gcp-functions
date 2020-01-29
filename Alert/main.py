@@ -82,7 +82,7 @@ def hello_world(request):
     
     payload=payload.replace("'",'"')
     splunkmessage=splunkmessage+'"event":'+payload+'}'
-    print('payload is:',splunkmessage)
+    #print('payload is:',splunkmessage)
     splunkHec(splunkmessage,source)
     
     
@@ -141,7 +141,7 @@ def errorHandler(logdata,source,url,token):
     
     data = logdata.encode('utf-8')
     # Add two attributes, origin and username, to the message
-    future = publisher.publish(topic_path, data, url=url, token=token, origin=source, source='gcpSplunkPubSubFunction')
+    future = publisher.publish(topic_path, data, url=url, token=token, origin=source, source='gcpSplunkAlertFunction')
    
 
    
