@@ -56,7 +56,7 @@ e.g. mysplunkinstance.splunk.com:8088 or 113.114.115.192:8088</td></tr>
 <tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
 <tr><td>HOST</td><td>Host value that Splunk will assign for the Alert event. Defaults to GCP_Alert_Function</td></tr>
 <tr><td>SPLUNK_SOURCETYPE</td><td>Sourcetype that will be given to the event (defaults to google:gcp:alert)</td></tr>
-<tr><td>SPLUNK_SOURCE</td><td>If set, this will be assigned to the “Source” of the event. If not set, defaults to "Stackdriver Alert"</td></tr>
+<tr><td>SPLUNK_SOURCE</td><td>If set, this will be assigned to the “Source” of the event. If not set, defaults to "Stackdriver Alert:policyname"</td></tr>
 <tr><td>INDEX</td><td>If this is set, its value can be set to over-ride the HEC token index. (defaults to no value – i.e. HEC token set index name)</td></tr>
 <tr><td>RETRY_TOPIC</td><td>Name of Topic to send event to on any failure scenario for the function</td></tr>
 </table>
