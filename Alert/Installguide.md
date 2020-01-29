@@ -66,7 +66,7 @@ e.g. mysplunkinstance.splunk.com:8088 or 113.114.115.192:8088</td></tr>
 ## **Sourcetype definition**
 
 Add this stanza to your Splunk props.conf
-
+<pre>
 [google:gcp:alert]
 category = Custom
 pulldown_type = 1
@@ -78,7 +78,7 @@ KV_MODE=none
 NO_BINARY_CHECK = true
 disabled = false
 TRUNCATE=0
-
+</pre>
 
 
 
