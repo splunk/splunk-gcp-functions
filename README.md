@@ -26,6 +26,10 @@ Any messages that failed to be sent to HEC are sent into a PubSub topic for retr
 This function is periodically triggered via a Cloud Scheduler push to a PubSub topic. The function calls GCP’s API to retrieve the cloud asset list. The list is written to a GCS bucket. (bucket location is defined in an environment variable).
 Once in the GCS Bucket, the GCS function above can be used to read in the contents of the asset list into Splunk.
 
+**Alerts**
+
+This function will can be triggered by a Stackdriver Alert (via webhook), sending the alert details to HEC. 
+
 **Retry Function**
 
 This function periodically requests any failed events that were sent to a PubSub Topic, and re-tries sending to HEC. If there is a subsequent failure to sending to Splunk, the function will not acknowledge the pull from PubSub, and therefore will be re-tried at a later attempt.
