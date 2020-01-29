@@ -1,4 +1,4 @@
-#GCP - AlertFunction v0.0.1
+#GCP - AlertFunction v0.0.2
 
 '''MIT License
 Copyright (c) 2019 Splunk
@@ -33,11 +33,29 @@ urllib3.disable_warnings()
 
 def hello_world(request):
     """Responds to HTTP request from Alert Webhook.
+    Args:
+        request (flask.Request): HTTP request object.
+    Returns:
+        The response text or any set of values that can be turned into a
+        Response object using
+        `make_response <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>`.
     """
-    
     now_time = round(time.time(),3)
+    
     request_json = request.get_json()
-    print(request_json)
+    
+    if request_json and 'incident' in request_json:
+        incident= request_json['incident']
+        name = incident['policy_name']
+        if str(incident['ended_at'])=='None':
+            incident['ended_at']="None"
+            request_json['incident']=incident
+            
+        payload=str(request_json)
+    else:
+        print('unknown alert message')
+        return
+
     
     try:
       host=os.environ['HOST']
@@ -46,7 +64,7 @@ def hello_world(request):
     try:
       source=os.environ['SPLUNK_SOURCE']
     except:
-      source="Stackdriver Alert"
+      source="Stackdriver Alert:"+name
     try:
       sourcetype=os.environ['SPLUNK_SOURCETYPE']
     except:
@@ -61,11 +79,15 @@ def hello_world(request):
         indexname='"index":"'+indexname+'",'
     
     splunkmessage='{"time":'+str(now_time)+',"host":"'+host+'","source":"'+source+'","sourcetype":"'+sourcetype+'",'+indexname
-    payload=str(request_json)
+    
     payload=payload.replace("'",'"')
     splunkmessage=splunkmessage+'"event":'+payload+'}'
     print('payload is:',splunkmessage)
     splunkHec(splunkmessage,source)
+    
+    
+
+    
     
 
     
@@ -120,4 +142,6 @@ def errorHandler(logdata,source,url,token):
     data = logdata.encode('utf-8')
     # Add two attributes, origin and username, to the message
     future = publisher.publish(topic_path, data, url=url, token=token, origin=source, source='gcpSplunkPubSubFunction')
+   
+
    
