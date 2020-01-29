@@ -57,7 +57,7 @@ gcloud functions deploy **myPubSubFunction** --runtime python37 --trigger-topic=
 13.	Add the Environment variables and values described in the table below
 14.	In another browser window, check that the log export that is subscribed by the PubSub Topic has eliminated the name of the function. (see below)
 15.	Click Deploy
-16.	You will need to install the PubSubRetry function if you wish to have a recovery for any events that failed to write to Splunk. See install guide for that function.
+16.	You will need to install the Retry function if you wish to have a recovery for any events that failed to write to Splunk. See install guide for that function.
 
 ## **Function Environment Variables**
 
