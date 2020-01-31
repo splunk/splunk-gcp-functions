@@ -51,3 +51,7 @@ You will need a Splunk instance that has a public facing URL for HEC. To get up 
 ## Troubleshooting
 
 For common issues with this library, head to the Examples folder and read the troubleshooting guide
+
+## Dashboards
+
+There is a template Splunk App available that provides dashboards to visualise the logs/metrics from these functions. This can be found/downloaded here - https://github.com/pauld-splunk/gcp_dashboards
