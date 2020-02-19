@@ -34,7 +34,7 @@ git clone https://github.com/splunk/splunk-gcp-functions.git
 
 cd splunk-gcp-functions/PubSubFunction
 
-gcloud functions deploy **myPubSubFunction** --runtime python37 --trigger-topic=**TRIGGER_TOPIC** --entry-point=hello_pubsub --allow-unauthenticated --set-env-vars=HEC_URL='**HOSTNAME_OR_IP_FOR_HEC**',HEC_TOKEN='**0000-0000-0000-0000**',PROJECTID='**Project-id**',RETRY_TOPIC='**Retry_Topic**'
+gcloud functions deploy **myPubSubFunction** --runtime python37 --trigger-topic=**TRIGGER_TOPIC** --entry-point=hello_pubsub --allow-unauthenticated --set-env-vars=HEC_URL='**HOSTNAME_OR_IP_FOR_HEC**',HEC_TOKEN='**0000-0000-0000-0000**',INDEXER_ACKNOWLEDGEMENT=**true**,PROJECTID='**Project-id**',RETRY_TOPIC='**Retry_Topic**'
 
 ***Update the bold values with your own settings***
 
@@ -65,6 +65,7 @@ gcloud functions deploy **myPubSubFunction** --runtime python37 --trigger-topic=
 <tr><td>HEC_URL</td><td>Hostname/IP address and port number for URL for Splunk HEC (Load balancer required for cluster)
 e.g. mysplunkinstance.splunk.com:8088 or 113.114.115.192:8088</td></tr>
 <tr><td>HEC_TOKEN</td><td>HEC Token for the input. Generate on Splunk instance.</td></tr>
+<tr><td>INDEXER_ACKNOWLEDGEMENT</td><td>If set to true, Cloud Function will check the acknowledgement of each event sent to Splunk. You have to enable indexer acknowledgement on your HEC endpoint before setting this to true. Defaults to False</td></tr>
 <tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
 <tr><td>HOST</td><td>Host value that Splunk will assign for the PubSub event. Defaults to GCPFunction</td></tr>
 <tr><td>SPLUNK_SOURCETYPE</td><td>Sourcetype that will be given to the event (defaults to google:gcp:pubsub:message)</td></tr>
