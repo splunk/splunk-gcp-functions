@@ -55,3 +55,9 @@ For common issues with this library, head to the Examples folder and read the tr
 ## Dashboards
 
 There is a template Splunk App available that provides dashboards to visualise the logs/metrics from these functions. This can be found/downloaded here - https://github.com/pauld-splunk/gcp_dashboards
+
+## Terraform Automation
+
+A Terraform Project for automating deployment of these functions is available here - https://github.com/nstonesplunk/cumulostrata
+The project contains automation for configuring all parts of a data collection pipeline (Pub/Sub topics, schedulers, IAM service accounts, etc.) for GCS, Stackdriver Logging, and Stackdriver Metrics.
+
