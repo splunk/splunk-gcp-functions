@@ -21,6 +21,10 @@ This function needs to be used with the GCS Function to read the Asset Inventory
 
 ## **Install with gcloud CLI**
 
+
+*It may be easier to start with the full Example script provided in the Examples folder as it will create most of the pre-requisites and supporting entities - https://github.com/splunk/splunk-gcp-functions/blob/master/Examples/Example-4-Assets.md*
+
+
 (run in bash or the Cloud Shell)
 
 git clone https://github.com/splunk/splunk-gcp-functions.git
@@ -32,6 +36,8 @@ gcloud functions deploy **myAssetFunction** --runtime python37 --trigger-topic=*
 ** *Update the bold values with your own settings* **
 
 *Note that the above example does not identify or send the data to Splunk HEC - the GCS Function should be added to do this*
+
+
 
 ## **Manual Setup**
 
