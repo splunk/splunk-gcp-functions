@@ -61,7 +61,7 @@ RETRY_SCHEDULE=ExampleRetrySchedule
 
 #make sure that the function has access to view the assets.
 gcloud projects add-iam-policy-binding $MY_PROJECT \
-  --member serviceAccount:$MY_PROJECT@gappspot.gserviceaccount.com \
+  --member serviceAccount:$MY_PROJECT@appspot.gserviceaccount.com \
   --role roles/cloudasset.viewer
 
 gsutil mb gs://$GCS_ASSETS_BUCKET
