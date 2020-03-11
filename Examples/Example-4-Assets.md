@@ -3,6 +3,7 @@
 This example will create 3 PubSub Topics, create the Assets and a GCS Function with a Retry Function, a GCS example bucket. 2 Cloud Schedules are also created to trigger the Assets and Retry Functions (via PubSub Topic). Note that the Retry Schedule and Retry Trigger and Retry Topic is common between all of examples and doesn't need to be repeated if you build more than one example.
 
 Note: This function requires Cloud Assets API to be enabled on the Project you will be requesting the Asset inventory from. Do this before deploying the functions.
+Also, ensure that the Cloud Schedule is enabled before running the script. (create a dummy schedule to confirm this beforehand)
 
 #### PubSub Topics Created:
 

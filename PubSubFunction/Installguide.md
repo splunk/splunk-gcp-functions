@@ -28,6 +28,9 @@ PubSub Function requires the Retry Function. Install and set up the Retry Functi
 
 ## Install with gcloud CLI
 
+*Suggestion: It may be easier to start with the full Example script provided in the Examples folder as it will create most of the pre-requisites and supporting entities - https://github.com/splunk/splunk-gcp-functions/blob/master/Examples/Example-1-PubSub.md*
+
+
 (run in bash or the Cloud Shell)
 
 git clone https://github.com/splunk/splunk-gcp-functions.git

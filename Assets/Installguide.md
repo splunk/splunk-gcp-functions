@@ -22,7 +22,7 @@ This function needs to be used with the GCS Function to read the Asset Inventory
 ## **Install with gcloud CLI**
 
 
-*It may be easier to start with the full Example script provided in the Examples folder as it will create most of the pre-requisites and supporting entities - https://github.com/splunk/splunk-gcp-functions/blob/master/Examples/Example-4-Assets.md*
+*Suggestion: It may be easier to start with the full Example script provided in the Examples folder as it will create most of the pre-requisites and supporting entities - https://github.com/splunk/splunk-gcp-functions/blob/master/Examples/Example-4-Assets.md*
 
 
 (run in bash or the Cloud Shell)

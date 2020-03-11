@@ -63,6 +63,8 @@ The main settings to consider are:
 
 ## Install with gcloud CLI
 
+*Suggestion: It may be easier to start with one of the full Example scripts provided in the Examples folder as they will create most of the pre-requisites and supporting entities - https://github.com/splunk/splunk-gcp-functions/blob/master/Examples*
+
 (run in bash or the Cloud Shell)
 
 git clone https://github.com/pauld-splunk/splunk-gcp-functions.git
