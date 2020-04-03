@@ -31,6 +31,7 @@ Also, ensure that the Cloud Schedule is enabled before running the script. (crea
 
 **Note that you will need to change values in bold in the scripts below to identify your project id, HEC URL, token and GCS Bucket**
 You can also change the OS environment variables in the first section to fit your needs
+
 Note:
 Use your Project ID for MY_PROJECT and not Project Name / Number
 
