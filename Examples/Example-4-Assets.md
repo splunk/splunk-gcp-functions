@@ -31,12 +31,12 @@ Also, ensure that the Cloud Schedule is enabled before running the script. (crea
 
 **Note that you will need to change values in bold in the scripts below to identify your project id, HEC URL, token and GCS Bucket**
 You can also change the OS environment variables in the first section to fit your needs
-
-Note:
+<br/>
+Note:<br/>
 Use your Project ID for MY_PROJECT and not Project Name / Number
-
+<br/>
 Change the value of PARENT to your organisation id if you want to use Organization level, eg "organization/orgid" (see install guide for more details)
-
+<br/>
 When running the scripts the first time in a new project, if asked, accept the queries to create/initialise services
 
 <pre>
