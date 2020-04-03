@@ -31,7 +31,10 @@ Also, ensure that the Cloud Schedule is enabled before running the script. (crea
 
 **Note that you will need to change values in bold in the scripts below to identify your project id, HEC URL, token and GCS Bucket**
 You can also change the OS environment variables in the first section to fit your needs
-Note to use your Project ID, and not Project Name / Number
+Note:
+Use your Project ID for MY_PROJECT and not Project Name / Number
+
+Change the value of PARENT to your organisation id if you want to use Organization level, eg "organization/orgid" (see install guide for more details)
 
 When running the scripts the first time in a new project, if asked, accept the queries to create/initialise services
 
@@ -40,6 +43,7 @@ When running the scripts the first time in a new project, if asked, accept the q
 #set OS environment variables for script. Change these for your deployment
 
 MY_PROJECT=<strong>MY_PROJECT</strong>
+PARENT=project/$MY_PROJECT
 ASSETS_FUNCTION=ExampleAssetsFunction
 # remember to give the bucket a global unique id. The file bath contains the object prefix for the object created by the asset function
 GCS_ASSETS_BUCKET=<strong>example-assets-bucket-xxxx</strong>
@@ -82,7 +86,7 @@ gcloud scheduler jobs create pubsub $ASSETS_SCHEDULE --schedule "0 */6 * * *" --
 gcloud functions deploy $ASSETS_FUNCTION --runtime python37 \
   --trigger-topic=$ASSETS_TRIGGER_PUBSUB --entry-point=hello_pubsub \
   --allow-unauthenticated \
-  --set-env-vars=PROJECTID=$MY_PROJECT,GCS_FILE_PATH=$GCS_FILE_PATH
+  --set-env-vars=PARENT=$PARENT,GCS_FILE_PATH=$GCS_FILE_PATH
 
 
 cd ../GCS
