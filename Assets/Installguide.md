@@ -31,7 +31,7 @@ git clone https://github.com/splunk/splunk-gcp-functions.git
 
 cd splunk-gcp-functions/Asset
 
-gcloud functions deploy **myAssetFunction** --runtime python37 --trigger-topic=**ASSETS_TRIGGER_TOPIC** --entry-point=hello_pubsub --allow-unauthenticated --timeout=120 --set-env-vars=PROJECTID='**Project-id**',GCS_FILE_PATH='**Path-and-prefix-to-GCS-Bucket**'
+gcloud functions deploy **myAssetFunction** --runtime python37 --trigger-topic=**ASSETS_TRIGGER_TOPIC** --entry-point=hello_pubsub --allow-unauthenticated --timeout=120 --set-env-vars=PARENT='**ParentID**',GCS_FILE_PATH='**Path-and-prefix-to-GCS-Bucket**'
 
 ** *Update the bold values with your own settings* **
 
@@ -60,7 +60,7 @@ gcloud functions deploy **myAssetFunction** --runtime python37 --trigger-topic=*
 ## **Function Environment Variables**
 
 <table><tr><td><strong>Variable</strong></td><td><strong>Value</strong></td></tr>
-<tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
+<tr><td>PARENT</td><td>Project ID, Organisation ID or Folder to collect the assets information - This can only be an organization number (such as "organizations/123"), a project ID (such as "projects/my-project-id"), a project number (such as "projects/12345"), or a folder number (such as "folders/123") </td></tr>
 <tr><td>GCS_FILE_PATH</td><td>GCS path to bucket where the Assets inventory will be written. 
 <br>Enter the full path and initial prefix to this bucket and object - eg. gs://my_asset_bucket_for_project/asset_file<br>
 Note that unixtime will be added to the filename on writing from the function</td></tr>
