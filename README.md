@@ -30,6 +30,10 @@ Once in the GCS Bucket, the GCS function above can be used to read in the conten
 
 This function will can be triggered by a Stackdriver Alert (via webhook), sending the alert details to HEC. 
 
+**Billing**
+Billing can be read in via the GCS function. To trigger a billing report, there is a function here to do this:
+https://github.com/raddaoui/billing_export_bq_gcs/blob/master/main.py
+
 **Retry Function**
 
 This function periodically requests any failed events that were sent to a PubSub Topic, and re-tries sending to HEC. If there is a subsequent failure to sending to Splunk, the function will not acknowledge the pull from PubSub, and therefore will be re-tried at a later attempt.
