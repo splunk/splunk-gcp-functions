@@ -1,4 +1,4 @@
-#GCP - AlertFunction v0.0.2
+#GCP - AlertFunction v0.1.0
 
 '''MIT License
 Copyright (c) 2019 Splunk

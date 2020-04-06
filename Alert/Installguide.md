@@ -1,7 +1,7 @@
 # GCP Cloud Functions – Installation / Setup Guide
 
 ## Alert Function 
-(version 0.0.1 Beta)
+(version 0.1)
 
 ## **Function Flow process**
 
