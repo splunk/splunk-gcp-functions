@@ -6,7 +6,7 @@ This function triggers on objects being written to a GCS Bucket. The bucket is s
 Any messages that failed to be sent to HEC are sent into a PubSub topic for retry. A recovery function will attempt to resend periodically.
 
 Note- 
-Due to the memory capacity limits for GCP Functions, this function has a limitation of sending log files that are smaller than 1GB. Log files larger than 1GB will cause the function to exit with a memory limit exceeded.
+Due to the memory capacity limits for GCP Functions, this function has a limitation of sending log files that are smaller than 1GB. Log files larger than 1GB will cause the function to chunk up the file into smaller temporary files approx 900M each. These are cleaned up after they are copied into Splunk.
 
 ![GCS Function overview](../images/GCS.png)
 

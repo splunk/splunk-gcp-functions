@@ -1,4 +1,4 @@
-#GCSfunction v0.2.0
+#GCSfunction v0.2.1
 
 '''MIT License
 Copyright (c) 2020 Splunk
@@ -56,79 +56,118 @@ def read_file(file):
       threadcount=os.environ['THREADS']   #non-mandatory env variable. Default is 127
     except:
       threadcount=127
-
- 
-    storage_client = storage.Client()
+    
     global objectname
     global contents
     global positions
+     
+    storage_client = storage.Client()
     objectname=file['bucket']+'/'+file['name']
     bucket = storage_client.get_bucket(file['bucket'])
-    blob = bucket.blob(file['name'])
-    try:
-      contents = blob.download_as_string().decode("utf-8")
-    except:
-      #exception happens when partial uploads/file not complete. Drop out of the function gracefully
-      print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload. Will re-execute on full write')
-      return
+    blob = bucket.get_blob(file['name'])
     
-    startpt = 0
-    counter=0
-    lastpt = batch
-    content_length = len(contents)
+    blobsize = blob.size
     
-    queue = Queue()
-    
-    workers=int(round(content_length/batch))
-    if workers<threadcount:
-        threadcount=workers
-    # Create worker threads (no need to thread more than number of packages)
-    for x in range(threadcount):
-        worker = HECThreadWorker(queue)
-        # Set as daemon thread 
-        worker.daemon = True
-        worker.start()
-    
-    if content_length>batch:
-        try:
-          linebrk=os.environ['LINE_BREAKER']
-        except:
-          linebrk='\n'
-        try:
-          before=os.environ['BEFORE']    #non-mandatory env variable. Default is to break after
-          if before not in ['TRUE','FALSE']: #validate - default to after if not TRUE or FALSE
+    maxsize=943718400 #900MB
+    print(f"Object size: {blobsize}")
+
+    if blobsize>maxsize+1 and not (".tmp_chnk_." in file['name']):
+      print('Object size is too big for 1 pass. Splitting into sub-objects (temporary)')
+
+      chunks = round(blobsize/maxsize)
+
+      chunk_s=0
+      chunk_e=maxsize
+      counter=0
+      write_client = storage.Client()
+      while chunk_e<blobsize:
+        contents = blob.download_as_string(start=chunk_s,end=chunk_e).decode("utf-8")
+        write_bucket = write_client.get_bucket(file['bucket'])
+        write_blob = write_bucket.blob(file['name']+'.tmp_chnk_.'+str(counter))
+        write_blob.upload_from_string(contents)
+        counter=counter+1
+        chunk_s=chunk_e+1
+        chunk_e=chunk_e+maxsize
+      if chunk_s<blobsize:
+        contents = blob.download_as_string(start=chunk_s,end=blobsize).decode("utf-8")
+        write_bucket = write_client.get_bucket(file['bucket'])
+        write_blob = write_bucket.blob(file['name']+'.tmp_chnk_.'+str(counter))
+        write_blob.upload_from_string(contents)
+    else:
+      #one file to read....
+      try:
+        contents = blob.download_as_string().decode("utf-8")
+      except:
+        #exception happens when partial uploads/file not complete. Drop out of the function gracefully
+        print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload. Will re-execute on full write')
+        return
+      
+      startpt = 0
+      counter=0
+      lastpt = batch
+      content_length = len(contents)
+      
+      queue = Queue()
+      
+      workers=int(round(content_length/batch))
+      if workers<threadcount:
+          threadcount=workers
+      # Create worker threads (no need to thread more than number of packages)
+      for x in range(threadcount):
+          worker = HECThreadWorker(queue)
+          # Set as daemon thread 
+          worker.daemon = True
+          worker.start()
+      
+      if content_length>batch:
+          try:
+            linebrk=os.environ['LINE_BREAKER']
+          except:
+            linebrk='\n'
+          try:
+            before=os.environ['BEFORE']    #non-mandatory env variable. Default is to break after
+            if before not in ['TRUE','FALSE']: #validate - default to after if not TRUE or FALSE
+              before='FALSE'
+          except:
             before='FALSE'
+          
+          
+          for match in re.finditer(linebrk,contents):
+            s = match.start()
+            e = match.end()
+            if ((e - startpt)>=batch) or ((content_length - e)<= batch):
+              positions.append([])
+              positions[counter].append(startpt)
+              if before=='TRUE':
+                positions[counter].append(s)
+                startpt=s
+              else:
+                positions[counter].append(e)
+                startpt=e
+              counter=counter+1
+
+      #print(f"counter : {counter}.")
+      
+      x=0
+      while x<counter:
+        queue.put(x)
+        x=x+1
+      
+
+      # wait for the queue to finish processing all the tasks
+      #print('finished processing')
+      queue.join()
+      
+      contents=""
+      objectname=""
+      positions.clear()
+
+      if (".tmp_chnk_." in file['name']):
+        print(f"Deleting temporary chunked object: {file['name']}")
+        try:
+          blob.delete()
         except:
-          before='FALSE'
-        
-        
-        for match in re.finditer(linebrk,contents):
-          s = match.start()
-          e = match.end()
-          if ((e - startpt)>=batch) or ((content_length - e)<= batch):
-            positions.append([])
-            positions[counter].append(startpt)
-            if before=='TRUE':
-              positions[counter].append(s)
-              startpt=s
-            else:
-              positions[counter].append(e)
-              startpt=e
-            counter=counter+1
-    
-    x=0
-    while x<counter:
-      queue.put(x)
-      x=x+1
-    
-
-    # wait for the queue to finish processing all the tasks
-
-    queue.join()
-    
-    contents=""
-    objectname=""
-    positions.clear()
+          print("Delete failed")
 
 
 
@@ -163,7 +202,7 @@ def splunkHec(logpos):
   logdata=contents[pos0:pos1]
  
   try:
-    r = s.post(url, headers=authHeader, data=logdata.encode("utf-8"), verify=False, timeout=3, stream=False)
+    r = s.post(url, headers=authHeader, data=logdata.encode("utf-8"), verify=False, timeout=10, stream=False)
     r.raise_for_status()
     r.close()
     s.close()
