@@ -61,7 +61,7 @@ cd splunk-gcp-functions/GCS
 
 gcloud functions deploy $GCS_FUNCTION --runtime python37 \
   --trigger-bucket=$GCS_BUCKET --entry-point=hello_gcs \
-  --allow-unauthenticated \
+  --allow-unauthenticated --timeout=300 --memory=2048MB\
   --set-env-vars=HEC_URL=$HEC_URL,HEC_TOKEN=$GCS_TOKEN,PROJECTID=$MY_PROJECT,RETRY_TOPIC=$RETRY_TOPIC
 
 

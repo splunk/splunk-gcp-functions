@@ -28,7 +28,7 @@ PubSub Function requires the Retry Function
 
 ## **Function Limits:**
 
-The GCP functions have a memory capacity limit of 2GB. Therefore this function has a limitation of sending log files that smaller than 1G. Log files larger than this will cause the function to exit with a memory limit exceeded.
+The GCP functions have a memory capacity limit of 2GB. Therefore this function has a limitation of sending log files that smaller than 1G. Log files larger than this will cause the function to exit with a memory limit exceeded. Also make sure that the time out setting for the function is large enough for copying the file. 
 
 ## **Install with gcloud CLI**
 
@@ -40,7 +40,7 @@ git clone https://github.com/splunk/splunk-gcp-functions.git
 
 cd splunk-gcp-functions/GCS
 
-gcloud functions deploy **myGCSFunction** --runtime python37 --trigger-bucket=**TRIGGER_BUCKET** --entry-point=hello_gcs --allow-unauthenticated --set-env-vars=HEC_URL='**HOSTNAME_OR_IP_FOR_HEC**',HEC_TOKEN='**0000-0000-0000-0000**',PROJECTID='**Project-id**',RETRY_TOPIC='**Retry_Topic**'
+gcloud functions deploy **myGCSFunction** --runtime python37 --trigger-bucket=**TRIGGER_BUCKET** --entry-point=hello_gcs --allow-unauthenticated --timeout=300 --memory=2048MB --set-env-vars=HEC_URL='**HOSTNAME_OR_IP_FOR_HEC**',HEC_TOKEN='**0000-0000-0000-0000**',PROJECTID='**Project-id**',RETRY_TOPIC='**Retry_Topic**'
 
 ***Update the bold values with your own settings***
 
@@ -62,8 +62,9 @@ gcloud functions deploy **myGCSFunction** --runtime python37 --trigger-bucket=**
 12.	Select the region where you want the function to run
 13.	Click on the + Add variable to open up the Environment variables entry
 14.	Add the Environment variables and values described in the table below
-15.	Click Deploy
-16.	You will need to install the RetryBatch function if you wish to have a recovery for any events that failed to write to Splunk. See install guide for that function.
+15. Make sure you select the appropriate size'd Function Memory Allocation - if you are going to ingest large files, set to Max 2GB
+16.	Click Deploy
+17.	You will need to install the RetryBatch function if you wish to have a recovery for any events that failed to write to Splunk. See install guide for that function.
 
 ## **Function Environment Variables**
 
@@ -78,8 +79,8 @@ Defaults to \n (newline)</td></tr>
 Defaults to FALSE</td></tr>
 <tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
 <tr><td>RETRY_TOPIC</td><td>Name of Topic to send event to on any failure scenario for the function</td></tr>
-<tr><td>BATCH</td><td>Size of Batch to send to HEC. Default 32k</td></tr>
-<tr><td>THREADS</td><td>Number of worker threads to send payload to HEC. Use only if issues with load on HEC. Default 127 (i.e. 128 threads)</td></tr>
+<tr><td>BATCH</td><td>Size of Batch to send to HEC. Reduce this if you want less events per batch to be sent to Splunk. Default 32k</td></tr>
+<tr><td>THREADS</td><td>Number of worker threads to send payload to HEC. Use only if issues with overload on HEC. Default 127 (i.e. 128 threads)</td></tr>
 </table>
 
 
