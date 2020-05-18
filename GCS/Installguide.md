@@ -28,7 +28,7 @@ PubSub Function requires the Retry Function
 
 ## **Function Limits:**
 
-The GCP functions have a memory capacity limit of 2GB. Therefore this function has a limitation of sending log files that smaller than 1G. Log files larger than this will cause the function to exit with a memory limit exceeded. Also make sure that the time out setting for the function is large enough for copying the file. 
+Due to the memory capacity limits for GCP Functions, this function has a limitation of sending log files that smaller than 1GB. Log files larger than 1GB will cause the function to exit with a memory limit exceeded. Also make sure that the time out setting for the function is large enough for copying the file. 
 
 ## **Install with gcloud CLI**
 
