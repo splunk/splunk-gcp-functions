@@ -73,9 +73,6 @@ def read_file(file):
 
     if blobsize>maxsize+1 and not (".tmp_chnk_." in file['name']):
       print('Object size is too big for 1 pass. Splitting into sub-objects (temporary)')
-
-      chunks = round(blobsize/maxsize)
-
       chunk_s=0
       chunk_e=maxsize
       counter=0
