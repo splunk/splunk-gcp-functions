@@ -1,5 +1,5 @@
 # GCS Function 
-(Version 0.1.1)
+(Version 0.2.0)
 
 
 ## **Function Flow process**
@@ -25,6 +25,10 @@ e.g. if the logs in bucket A has sourcetype B and the destination is a HEC desti
 ## **Function Dependencies:**
 
 PubSub Function requires the Retry Function 
+
+## **Function Limits:**
+
+The GCP functions have a memory capacity limit of 2GB. Therefore this function has a limitation of sending log files that smaller than 1G. Log files larger than this will cause the function to exit with a memory limit exceeded.
 
 ## **Install with gcloud CLI**
 
@@ -74,6 +78,8 @@ Defaults to \n (newline)</td></tr>
 Defaults to FALSE</td></tr>
 <tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
 <tr><td>RETRY_TOPIC</td><td>Name of Topic to send event to on any failure scenario for the function</td></tr>
+<tr><td>BATCH</td><td>Size of Batch to send to HEC. Default 32k</td></tr>
+<tr><td>THREADS</td><td>Number of worker threads to send payload to HEC. Use only if issues with load on HEC. Default 127 (i.e. 128 threads)</td></tr>
 </table>
 
 
