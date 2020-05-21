@@ -29,7 +29,10 @@ from requests.adapters import HTTPAdapter
 import urllib3
 ##turns off the warning that is generated below because using self signed ssl cert
 urllib3.disable_warnings()
+import uuid
+import logging
 
+maxNumberRetries = 5
 
 def hello_pubsub(event, context):
     
@@ -61,9 +64,12 @@ def hello_pubsub(event, context):
         indexing=os.environ['INDEX']
     except:
         indexing='False'
-    
-    indexname=''
+    try:
+        indexerAcknowledgement=os.environ['INDEXER_ACKNOWLEDGEMENT']
+    except:
+        indexerAcknowledgement=False
 
+    indexname=''
     if indexing!='False':
       if indexing=='LOGNAME':
         #find the position of the logname
@@ -98,7 +104,6 @@ def hello_pubsub(event, context):
     if indexname!='':
         indexname='"index":"'+indexname+'",'
 
-    
     source=context.resource['name']
     splunkmessage='{"time":'+str(now_time)+',"host":"'+host+'","source":"'+source+'","sourcetype":"'+sourcetype+'",'+indexname
     str_now_time=uxtime(now_time)
@@ -115,21 +120,23 @@ def hello_pubsub(event, context):
         payload=pubsub_message
 
     splunkmessage=splunkmessage+'"event":'+payload+'}'
-    splunkHec(splunkmessage,source)
-
+    splunkHec(splunkmessage,source,indexerAcknowledgement)
 
     
-def splunkHec(logdata,source):
+def splunkHec(logdata,source,indexerAcknowledgement):
   url = 'https://'+os.environ['HEC_URL']+'/services/collector/event'
   token = os.environ['HEC_TOKEN']
-  s = requests.Session() 
-  s.mount( 'http://' , HTTPAdapter(max_retries= 3 )) 
+  s = requests.Session()
+  s.mount( 'http://' , HTTPAdapter(max_retries= 3 ))
   s.mount( 'https://' , HTTPAdapter(max_retries= 3 ))
   
-  authHeader = {'Authorization': 'Splunk '+ token}
-  
+  if not indexerAcknowledgement:
+    authHeader = {'Authorization': 'Splunk '+ token}
+  else:
+    splunkRequestChannel=str(uuid.uuid4())
+    authHeader = {'Authorization': 'Splunk '+ token, 'X-Splunk-Request-Channel': splunkRequestChannel}
+
   try:
-  
     r = s.post(url, headers=authHeader, data=logdata.encode("utf-8"), verify=False, timeout=2)
     r.raise_for_status()
   except requests.exceptions.HTTPError as errh:
@@ -137,26 +144,61 @@ def splunkHec(logdata,source):
     if errh.response.status_code<500:
         print(r.json())
     errorHandler(logdata,source,url,token)
+    return
   except requests.exceptions.ConnectionError as errc:
     print ("Error Connecting:",errc)
     errorHandler(logdata,source,url,token)
+    return
   except requests.exceptions.Timeout as errt:
     print ("Timeout Error:",errt)
     errorHandler(logdata,source,url,token)
+    return
   except requests.exceptions.RequestException as err:
     print ("Error: ",err)
     errorHandler(logdata,source,url,token)
+    return
   except:
     print("unknown Error in http post >> message content:")
     print(logdata.replace('\n',''))
     errorHandler(logdata,source,url,token)
+    return
 
+  if indexerAcknowledgement:
+    # we received 200 response code
+    # let's make sure the event is ingested by the index
+    # get the response from the initial request and check the acknowledgement ID
+    response = r.json()
+    if 'ackId' not in response.keys():
+      logging.error('indexer acknowledgement is not enabled on your Splunk HEC data input')
+      errorHandler(logdata,source,url,token)
+      return
+
+    ackID = response['ackId']
+    ack_url = 'https://'+os.environ['HEC_URL']+'/services/collector/ack'
+    splunkack = '{"acks":['+str(ackID)+']}'
+    numberRetries = 0
+
+    while True:
+      numberRetries += 1
+      if numberRetries == maxNumberRetries:
+        logging.error('failed to index event')
+        errorHandler(logdata,source,url,token)
+        return
+      try:
+        time.sleep(1)
+        r2 = s.post(ack_url, headers=authHeader, data=splunkack, verify=False, timeout=2)
+        response = r2.json()
+        ack_res = response['acks'][str(ackID)]
+        if ack_res:
+          print ("success event is indexed")
+          return
+      except Exception as err:
+        logging.error("error getting response from HEC endpoint, iteration: " + str(numberRetries))
+        print ("Error: ",err)
 
 
 def uxtime(unixtime):
-    return datetime.utcfromtimestamp(unixtime).strftime('%Y-%m-%d %H:%M:%S')   
-
-
+    return datetime.utcfromtimestamp(unixtime).strftime('%Y-%m-%d %H:%M:%S')
 
 
 def errorHandler(logdata,source,url,token):
@@ -164,15 +206,10 @@ def errorHandler(logdata,source,url,token):
 
     from google.cloud import pubsub_v1
 
-
     project_id = os.environ['PROJECTID']
     topic_name = os.environ['RETRY_TOPIC']
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_name)
-
-    
     data = logdata.encode('utf-8')
     # Add url, token and source attributes to the message
     future = publisher.publish(topic_path, data, url=url, token=token, origin=source, source='gcpSplunkPubSubFunction')
-   
-
