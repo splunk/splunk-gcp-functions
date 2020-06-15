@@ -31,6 +31,7 @@ import urllib3
 urllib3.disable_warnings()
 
 objectname=""
+source=""
 contents=""
 positions=[[]]
 
@@ -60,15 +61,22 @@ def read_file(file):
     global objectname
     global contents
     global positions
+    global source
      
     storage_client = storage.Client()
     objectname=file['bucket']+'/'+file['name']
+    pos=objectname.find('.tmp_chnk_.')
+    if pos>-1:
+      source=objectname[0:pos]
+    else:
+      source=objectname
+     
     bucket = storage_client.get_bucket(file['bucket'])
     blob = bucket.get_blob(file['name'])
     
     blobsize = blob.size
     
-    maxsize=943718400 #900MB
+    maxsize=838860800  #800MB
     print(f"Object size: {blobsize}")
 
     if blobsize>maxsize+1 and not (".tmp_chnk_." in file['name']):
@@ -157,6 +165,7 @@ def read_file(file):
       
       contents=""
       objectname=""
+      source=""
       positions.clear()
 
       if (".tmp_chnk_." in file['name']):
@@ -184,7 +193,9 @@ class HECThreadWorker(Thread):
 
 
 def splunkHec(logpos):
-  url = 'https://'+os.environ['HEC_URL']+'/services/collector/raw?source=' + objectname
+  global source
+
+  url = 'https://'+os.environ['HEC_URL']+'/services/collector/raw?source=' + source
   try:
     host=os.environ['HOST']
     url=url+'&host='+host
