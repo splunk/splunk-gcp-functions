@@ -1,5 +1,5 @@
 # GCS Function 
-(Version 0.2.0)
+(Version 0.2.2)
 
 
 ## **Function Flow process**
