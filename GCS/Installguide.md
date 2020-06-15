@@ -73,6 +73,7 @@ gcloud functions deploy **myGCSFunction** --runtime python37 --trigger-bucket=**
 e.g. mysplunkinstance.splunk.com:8088 or 113.114.115.192:8088</td></tr>
 <tr><td>HEC_TOKEN</td><td>HEC Token for the input. Generate on Splunk instance.
 (make note of HEC token requirements above)</td></tr>
+<tr><td>HOST</td><td>Set the host metadata for the events. Defaults to Host set by the Splunk HEC Token settings if not defined. Default is not set</td></tr>
 <tr><td>LINE_BREAKER</td><td>Enter the regex for the line breaking for the events in the bucket objects. 
 Defaults to \n (newline)</td></tr>
 <tr><td>BEFORE</td><td>Set this to TRUE if you want to break BEFORE the line breaker, or FALSE if you want to break After the line breaker.

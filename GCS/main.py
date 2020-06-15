@@ -1,4 +1,4 @@
-#GCSfunction v0.2.1
+#GCSfunction v0.2.2
 
 '''MIT License
 Copyright (c) 2020 Splunk
@@ -184,7 +184,12 @@ class HECThreadWorker(Thread):
 
 
 def splunkHec(logpos):
-  url = 'https://'+os.environ['HEC_URL']+'/services/collector/raw'
+  url = 'https://'+os.environ['HEC_URL']+'/services/collector/raw?source=' + objectname
+  try:
+    host=os.environ['HOST']
+    url=url+'&host='+host
+  except:
+    host=''
   token = os.environ['HEC_TOKEN']
   s = requests.Session() 
   #s.mount( 'http://' , HTTPAdapter(max_retries= 1 )) 
