@@ -24,6 +24,7 @@ import base64
 import argparse
 import pprint
 import re
+import urllib.parse
 import requests
 from requests.adapters import HTTPAdapter
 import urllib3
@@ -67,9 +68,9 @@ def read_file(file):
     objectname=file['bucket']+'/'+file['name']
     pos=objectname.find('.tmp_chnk_.')
     if pos>-1:
-      source=objectname[0:pos]
+      source=urllib.parse.quote(objectname[0:pos])
     else:
-      source=objectname
+      source=urllib.parse.quote(objectname)
      
     bucket = storage_client.get_bucket(file['bucket'])
     blob = bucket.get_blob(file['name'])
