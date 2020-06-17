@@ -1,4 +1,4 @@
-#GCSfunction v0.2.2
+#GCSfunction v0.2.4
 
 '''MIT License
 Copyright (c) 2020 Splunk
@@ -43,6 +43,14 @@ def hello_gcs(event, context):
          context (google.cloud.functions.Context): Metadata for the event.
     """
     file = event
+    try:
+        exclude=os.environ['EXCLUDE']
+    except:
+        exclude=''
+    if re.search(exclude, file['name']) != None :
+      print(f"Skipping file: {file['name']}. Object name matched exclusion")
+      return
+
     print(f"Processing file: {file['name']}.")
     read_file(file)
 
@@ -58,6 +66,17 @@ def read_file(file):
       threadcount=os.environ['THREADS']   #non-mandatory env variable. Default is 127
     except:
       threadcount=127
+
+    try:
+      linebrk=os.environ['LINE_BREAKER']
+    except:
+      linebrk='\n'
+    try:
+      before=os.environ['BEFORE']    #non-mandatory env variable. Default is to break after
+      if before not in ['TRUE','FALSE']: #validate - default to after if not TRUE or FALSE
+        before='FALSE'
+    except:
+      before='FALSE' 
     
     global objectname
     global contents
@@ -78,6 +97,7 @@ def read_file(file):
     blobsize = blob.size
     
     maxsize=838860800  #800MB
+   
     print(f"Object size: {blobsize}")
 
     if blobsize>maxsize+1 and not (".tmp_chnk_." in file['name']):
@@ -87,13 +107,27 @@ def read_file(file):
       counter=0
       write_client = storage.Client()
       while chunk_e<blobsize:
+      
         contents = blob.download_as_string(start=chunk_s,end=chunk_e).decode("utf-8")
+        #find last occuring event break in current chunk, so that split is not breaking an event
+        lastpattern="(?s:.*)"+linebrk
+        matchLastPos=re.search(lastpattern, contents)
+        
+        if before=="TRUE":
+          #search back a little as this is a break before, otherwise can chop on incomplete event
+          last_end_s=matchLastPos.end()-20  
+          last_end_e=matchLastPos.end()
+          narrow=re.search(linebrk,contents[last_end_s:last_end_e])
+          lastchunkpos=narrow.start()+last_end_s-1
+        else:
+          lastchunkpos=matchLastPos.end()
+        
         write_bucket = write_client.get_bucket(file['bucket'])
         write_blob = write_bucket.blob(file['name']+'.tmp_chnk_.'+str(counter))
-        write_blob.upload_from_string(contents)
+        write_blob.upload_from_string(contents[0:lastchunkpos])
         counter=counter+1
-        chunk_s=chunk_e+1
-        chunk_e=chunk_e+maxsize
+        chunk_s=chunk_s+lastchunkpos
+        chunk_e=chunk_s+maxsize
       if chunk_s<blobsize:
         contents = blob.download_as_string(start=chunk_s,end=blobsize).decode("utf-8")
         write_bucket = write_client.get_bucket(file['bucket'])
@@ -105,7 +139,7 @@ def read_file(file):
         contents = blob.download_as_string().decode("utf-8")
       except:
         #exception happens when partial uploads/file not complete. Drop out of the function gracefully
-        print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload. Will re-execute on full write')
+        print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload or it is empty. Will re-execute on full write')
         return
       
       startpt = 0
@@ -125,18 +159,7 @@ def read_file(file):
           worker.daemon = True
           worker.start()
       
-      if content_length>batch:
-          try:
-            linebrk=os.environ['LINE_BREAKER']
-          except:
-            linebrk='\n'
-          try:
-            before=os.environ['BEFORE']    #non-mandatory env variable. Default is to break after
-            if before not in ['TRUE','FALSE']: #validate - default to after if not TRUE or FALSE
-              before='FALSE'
-          except:
-            before='FALSE'
-          
+      if content_length>batch:         
           
           for match in re.finditer(linebrk,contents):
             s = match.start()
@@ -151,8 +174,6 @@ def read_file(file):
                 positions[counter].append(e)
                 startpt=e
               counter=counter+1
-
-      #print(f"counter : {counter}.")
       
       x=0
       while x<counter:
