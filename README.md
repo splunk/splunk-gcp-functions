@@ -65,3 +65,5 @@ There is a template Splunk App available that provides dashboards to visualise t
 A Terraform Project for automating deployment of these functions is available here - https://github.com/nstonesplunk/cumulostrata
 The project contains automation for configuring all parts of a data collection pipeline (Pub/Sub topics, schedulers, IAM service accounts, etc.) for GCS, Stackdriver Logging, and Stackdriver Metrics.
 
+## Support
+These functions are currently open source and maintained by [pauld-splunk](https://github.com/pauld-splunk). This is not a Splunk supported solution.
