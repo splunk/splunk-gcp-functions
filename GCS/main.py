@@ -1,4 +1,4 @@
-#GCSfunction v0.2.4
+#GCSfunction v0.2.5
 
 '''MIT License
 Copyright (c) 2020 Splunk
@@ -97,7 +97,7 @@ def read_file(file):
     blobsize = blob.size
     
     maxsize=838860800  #800MB
-   
+    
     print(f"Object size: {blobsize}")
 
     if blobsize>maxsize+1 and not (".tmp_chnk_." in file['name']):
@@ -106,11 +106,11 @@ def read_file(file):
       chunk_e=maxsize
       counter=0
       write_client = storage.Client()
+      lastpattern="(?s:.*)"+linebrk
       while chunk_e<blobsize:
       
         contents = blob.download_as_string(start=chunk_s,end=chunk_e).decode("utf-8")
         #find last occuring event break in current chunk, so that split is not breaking an event
-        lastpattern="(?s:.*)"+linebrk
         matchLastPos=re.search(lastpattern, contents)
         
         if before=="TRUE":
@@ -139,7 +139,7 @@ def read_file(file):
         contents = blob.download_as_string().decode("utf-8")
       except:
         #exception happens when partial uploads/file not complete. Drop out of the function gracefully
-        print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload or it is empty. Will re-execute on full write')
+        print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload. Will re-execute on full write')
         return
       
       startpt = 0
@@ -150,6 +150,8 @@ def read_file(file):
       queue = Queue()
       
       workers=int(round(content_length/batch))
+      if workers<1:
+        workers=1
       if workers<threadcount:
           threadcount=workers
       # Create worker threads (no need to thread more than number of packages)
@@ -159,22 +161,43 @@ def read_file(file):
           worker.daemon = True
           worker.start()
       
-      if content_length>batch:         
-          
-          for match in re.finditer(linebrk,contents):
-            s = match.start()
-            e = match.end()
-            if ((e - startpt)>=batch) or ((content_length - e)<= batch):
-              positions.append([])
-              positions[counter].append(startpt)
-              if before=='TRUE':
-                positions[counter].append(s)
-                startpt=s
-              else:
-                positions[counter].append(e)
-                startpt=e
-              counter=counter+1
+      endpt=batch
       
+      if content_length>batch:         
+        #more than one batch        
+        while endpt<content_length:
+          contentsearch=contents[startpt:endpt]
+          #find last occuring event break in current chunk, so that split is not breaking an event
+          lastpattern="(?s:.*)"+linebrk
+          matchLastPos=re.search(lastpattern, contentsearch)
+          if before=="TRUE":
+            #search back a little as this is a break before, otherwise can chop on incomplete event
+            last_end_s=matchLastPos.end()-20  
+            last_end_e=matchLastPos.end()
+            narrow=re.search(linebrk,contentsearch[last_end_s:last_end_e])
+            lastchunkpos=narrow.start()+last_end_s-1
+          else:
+            lastchunkpos=matchLastPos.end()
+
+          positions.append([])
+          positions[counter].append(startpt)
+          positions[counter].append(startpt+lastchunkpos)
+          counter=counter+1
+          startpt=startpt+lastchunkpos
+          endpt=startpt+batch
+        
+        if startpt<content_length:
+            positions.append([])
+            positions[counter].append(startpt)
+            positions[counter].append(content_length)
+            counter=counter+1
+      else:
+        #only one batch
+        positions.append([])
+        positions[counter].append(startpt)
+        positions[counter].append(content_length)
+        counter=counter+1
+
       x=0
       while x<counter:
         queue.put(x)
@@ -186,6 +209,7 @@ def read_file(file):
       queue.join()
       
       contents=""
+      contentsearch=""
       objectname=""
       source=""
       positions.clear()
@@ -260,9 +284,8 @@ def splunkHec(logpos):
     print(logdata.replace('\n',''))
     errorHandler(logdata,objectname,url,token)
 
- 
-    
-    
+
+
 def errorHandler(logdata,source,url,token):
     """Publishes failed messages to Pub/Sub topic to Retry later."""
 
