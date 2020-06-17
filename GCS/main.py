@@ -96,7 +96,7 @@ def read_file(file):
     
     blobsize = blob.size
     
-    maxsize=838860800  #800MB
+    maxsize=209715200 #200M chunks (can be tuned - but note that memory limits on CF will limit this)
     
     print(f"Object size: {blobsize}")
 
