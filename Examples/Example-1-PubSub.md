@@ -69,9 +69,7 @@ gcloud logging sinks create $PUBSUB_SINK1 \
   pubsub.googleapis.com/projects/$MY_PROJECT/topics/$PUBSUB_TOPIC \
   --log-filter="resource.labels.function_name!=$PUBSUB_FUNCTION"
 
-gcloud logging sinks describe $PUBSUB_SINK1 > tmp.txt
-LOG_SINK_SERVICE_ACCOUNT="$(cat tmp.txt |grep -Eo "serviceAccount:\S[[:digit:]]+-[[:digit:]]+@[[:print:]]+")"
-rm tmp.txt
+LOG_SINK_SERVICE_ACCOUNT=`gcloud logging sinks describe $PUBSUB_SINK1 --format="value(writerIdentity)"`
 
 #the last command will return the LOG_SINK_SERVICE_ACCOUNT 
 gcloud pubsub topics add-iam-policy-binding $PUBSUB_TOPIC \
@@ -83,9 +81,7 @@ gcloud logging sinks create $PUBSUB_SINK2 \
   pubsub.googleapis.com/projects/$MY_PROJECT/topics/$PUBSUB_TOPIC \
   --log-filter="resource.type!=cloud_function"
 
-gcloud logging sinks describe $PUBSUB_SINK2 > tmp.txt
-LOG_SINK_SERVICE_ACCOUNT="$(cat tmp.txt |grep -Eo "serviceAccount:\S[[:digit:]]+-[[:digit:]]+@[[:print:]]+")"
-rm tmp.txt
+LOG_SINK_SERVICE_ACCOUNT=`gcloud logging sinks describe $PUBSUB_SINK2 --format="value(writerIdentity)"`
 
 #the last command will return the LOG_SINK_SERVICE_ACCOUNT 
 gcloud pubsub topics add-iam-policy-binding $PUBSUB_TOPIC \
