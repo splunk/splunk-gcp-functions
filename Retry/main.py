@@ -1,4 +1,4 @@
-#RetryAll0.2.0.py
+#RetryAll0.2.1.py
 '''MIT License
 Copyright (c) 2019 Splunk
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
@@ -189,7 +189,7 @@ def retrypushHandler():
     
     print('spawning another handler')
     project_id = os.environ['PROJECTID']
-    topic_name = os.environ['RETRY_TOPIC']
+    topic_name = os.environ['RETRY_TRIGGER_TOPIC']
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project_id, topic_name)
     future = publisher.publish(topic_path, 'SelfSpawn'.encode("utf-8"))
