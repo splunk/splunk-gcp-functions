@@ -1,7 +1,7 @@
-#GCP - PubSubFunction v0.1.10
+#GCP - PubSubFunction v0.1.11
 
 '''MIT License
-Copyright (c) 2019 Splunk
+Copyright (c) 2020 Splunk
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions: 
@@ -44,6 +44,15 @@ def hello_pubsub(event, context):
     timestamp_srt=pubsub_message.find(',"timestamp":"')+14
     timestamp_end=len(pubsub_message)-2
     timestamp=pubsub_message[timestamp_srt:timestamp_end]
+
+    #get epoch time for timestamp from the event timestamp
+    brokentime=timestamp[0:len(timestamp)-1].split(".")
+    date_time_obj = datetime.strptime(brokentime[0], '%Y-%m-%dT%H:%M:%S')
+    if len(brokentime)>1:
+      nanos=brokentime[1]
+      epoch=date_time_obj.strftime('%s')+'.'+nanos
+    else:
+      epoch=date_time_obj.strftime('%s')
 
     try:
       host=os.environ['HOST']
@@ -100,8 +109,8 @@ def hello_pubsub(event, context):
 
     
     source=context.resource['name']
-    splunkmessage='{"time":'+str(now_time)+',"host":"'+host+'","source":"'+source+'","sourcetype":"'+sourcetype+'",'+indexname
-    str_now_time=uxtime(now_time)
+    splunkmessage='{"time":'+ epoch +',"host":"'+host+'","source":"'+source+'","sourcetype":"'+sourcetype+'",'+indexname
+    
 
     try:
         COMPATIBLE=os.environ['COMPATIBLE']
@@ -150,12 +159,6 @@ def splunkHec(logdata,source):
     print("unknown Error in http post >> message content:")
     print(logdata.replace('\n',''))
     errorHandler(logdata,source,url,token)
-
-
-
-def uxtime(unixtime):
-    return datetime.utcfromtimestamp(unixtime).strftime('%Y-%m-%d %H:%M:%S')   
-
 
 
 
