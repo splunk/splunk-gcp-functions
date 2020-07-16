@@ -41,9 +41,10 @@ def hello_pubsub(event, context):
     now_time = round(time.time(),3)
     pubsub_message = base64.b64decode(event['data']).decode('utf-8')
 
-    timestamp_srt=pubsub_message.find(',"timestamp":"')+14
-    timestamp_end=len(pubsub_message)-2
-    timestamp=pubsub_message[timestamp_srt:timestamp_end]
+    pattern='"timestamp":\s*"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d*Z)'
+    pos=re.search(pattern,pubsub_message)
+
+    timestamp=pubsub_message[pos.start()+13:pos.end()]
 
     #get epoch time for timestamp from the event timestamp
     brokentime=timestamp[0:len(timestamp)-1].split(".")
