@@ -46,7 +46,7 @@ def hello_gcs(event, context):
     try:
         exclude=os.environ['EXCLUDE']
     except:
-        exclude=''
+        exclude='!settonotexcludeanything!'
     if re.search(exclude, file['name']) != None :
       print(f"Skipping file: {file['name']}. Object name matched exclusion")
       return
