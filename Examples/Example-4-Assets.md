@@ -44,7 +44,7 @@ When running the scripts the first time in a new project, if asked, accept the q
 #set OS environment variables for script. Change these for your deployment
 
 MY_PROJECT=<strong>MY_PROJECT</strong>
-PARENT=project/$MY_PROJECT
+PARENT=projects/$MY_PROJECT
 ASSETS_FUNCTION=ExampleAssetsFunction
 # remember to give the bucket a global unique id. The file bath contains the object prefix for the object created by the asset function
 GCS_ASSETS_BUCKET=<strong>example-assets-bucket-xxxx</strong>

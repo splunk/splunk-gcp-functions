@@ -109,7 +109,7 @@ Here are some samples that can be used for the METRICS_LIST variable:
 ### Cloud Functions:
 
 <pre>
-["cloudfunctions.googleapis.com/function/active_instances","cloudfunctions.googleapis.com/function/execution_count","cloudfunctions.googleapis.com/function/execution_times","cloudfunctions.googleapis.com/function/network_egress","container.googleapis.com/container/cpu/utilization","container.googleapis.com/container/disk/bytes_used"]
+["cloudfunctions.googleapis.com/function/active_instances","cloudfunctions.googleapis.com/function/execution_count","cloudfunctions.googleapis.com/function/execution_times","cloudfunctions.googleapis.com/function/network_egress","cloudfunctions.googleapis.com/function/user_memory_bytes"]
 </pre>
 
 ### Containers / Kubernetes

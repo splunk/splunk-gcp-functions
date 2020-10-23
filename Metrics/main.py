@@ -1,4 +1,4 @@
-#GCPMetricsFunction v0.7.0
+#GCPMetricsFunction v0.7.1
 #All-in-one metrics function
 
 '''MIT License
@@ -315,6 +315,10 @@ def pullPointsList(in_str):
     while start_t>7:
         end_t = in_str.find('}',start_t)
         strtime=in_str[start_t:end_t]
+        nanos_t = strtime.find('nanos')
+        if nanos_t>0:
+            strtime=strtime[0:nanos_t]  #some points have nanos.
+        
         starttime=uxtime(int(strtime))
 
         start_t2 = in_str.find('seconds:',end_t) + 8
