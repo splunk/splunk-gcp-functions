@@ -1,4 +1,4 @@
-#GCPMetricsFunction v0.7.1
+#GCPMetricsFunction v0.7.2
 #All-in-one metrics function
 
 '''MIT License
@@ -134,6 +134,7 @@ class BuilderThreadWorker(Thread):
                 self.queue.task_done()
                 
 def MetricBuilder(metric,now,HECevents,payloadType):
+    
     one_time_series = list_time_series(os.environ['PROJECTID'], metric, now, int(os.environ['TIME_INTERVAL']))
 
     source=os.environ['PROJECTID']+':'+metric
@@ -323,7 +324,11 @@ def pullPointsList(in_str):
 
         start_t2 = in_str.find('seconds:',end_t) + 8
         end_t2 = in_str.find('}',start_t2)
-        endtimeNum = in_str[start_t2:end_t2-3]   
+        endtimeNum = in_str[start_t2:end_t2-3] 
+        nanos_t = endtimeNum.find('nanos')
+        if nanos_t>0:
+            endtimeNum=endtimeNum[0:nanos_t]  #some points have nanos.  
+        
         endtime=uxtime(int(endtimeNum))
         
         start_vt = in_str.find('value {',start_t) + 10
