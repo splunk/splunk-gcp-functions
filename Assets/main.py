@@ -17,7 +17,7 @@ def hello_pubsub(event, context):
 
     client = asset_v1.AssetServiceClient()
     output_config = asset_v1.OutputConfig()
-    output_config.gcs_destination.uri = dump_file_path+str(now)
+    output_config.gcs_destination.uri = dump_file_path+str(now)+".json"
     content_type = asset_v1.ContentType.RESOURCE
 
     response = client.export_assets(
