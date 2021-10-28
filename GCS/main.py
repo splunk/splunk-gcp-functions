@@ -1,4 +1,4 @@
-#GCSfunction v0.2.6
+#GCSfunction v0.2.7
 
 '''MIT License
 Copyright (c) 2020 Splunk
@@ -96,7 +96,7 @@ def read_file(file):
     
     try:
         blobsize = blob.size
-      except:
+    except:
         #exception happens when partial uploads/file not complete. Drop out of the function gracefully
         print('Info: Nothing sent to Splunk yet - the file in GCS has not completed upload. Will re-execute on full write')
         return
