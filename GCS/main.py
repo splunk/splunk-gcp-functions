@@ -124,7 +124,7 @@ def read_file(file):
           last_end_s=matchLastPos.end()-20  
           last_end_e=matchLastPos.end()
           narrow=re.search(linebrk,contents[last_end_s:last_end_e])
-          lastchunkpos=narrow.start()+last_end_s-1
+          lastchunkpos=narrow.start()+last_end_s #note
         else:
           lastchunkpos=matchLastPos.end()
         
@@ -181,7 +181,7 @@ def read_file(file):
             last_end_s=matchLastPos.end()-20  
             last_end_e=matchLastPos.end()
             narrow=re.search(linebrk,contentsearch[last_end_s:last_end_e])
-            lastchunkpos=narrow.start()+last_end_s-1
+            lastchunkpos=narrow.start()+last_end_s #note
           else:
             lastchunkpos=matchLastPos.end()
 
