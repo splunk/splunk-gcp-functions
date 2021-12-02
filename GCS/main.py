@@ -1,4 +1,4 @@
-#GCSfunction v0.2.7
+#GCSfunction v0.2.8
 
 '''MIT License
 Copyright (c) 2020 Splunk
@@ -58,7 +58,7 @@ def hello_gcs(event, context):
 def read_file(file):
     # batch size balance between time to create http connection vs distribution of events across indexers (#characters/bytes per batch)
     try:
-      batch=os.environ['BATCH']    #non-mandatory env variable. Default is 70000. If this is set too low, then it can crash the function due to some events being larger than 64k
+      batch=os.environ['BATCH']    #non-mandatory env variable. Default is 70000. If this is set too low, then it can crash the function - make this AT LEAST as large as the largest single event size in the object
     except:
       batch=70000
     # number of threads to copy to Splunk HEC - default 128

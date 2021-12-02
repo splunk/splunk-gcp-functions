@@ -80,7 +80,7 @@ Defaults to \n (newline)</td></tr>
 Defaults to FALSE</td></tr>
 <tr><td>PROJECTID</td><td>Project ID for where the Retry Topic exists</td></tr>
 <tr><td>RETRY_TOPIC</td><td>Name of Topic to send event to on any failure scenario for the function</td></tr>
-<tr><td>BATCH</td><td>Size of Batch to send to HEC. Reduce this if you want less events per batch to be sent to Splunk. Default 32k</td></tr>
+<tr><td>BATCH</td><td>Size of Batch to send to HEC. Reduce this if you want less events per batch to be sent to Splunk. Increasing can improve throughput, but keep within HEC limits. Default 70k (if not set). Note that this needs to be AT LEAST the size of the largest event in the data being sent, otherwise the function will crash</td></tr>
 <tr><td>THREADS</td><td>Number of worker threads to send payload to HEC. Use only if issues with overload on HEC. Default 127 (i.e. 128 threads)</td></tr>
 <tr><td>EXCLUDE</td><td>If set, this should contain the Regex for any object key (filename) to exclude/ignore in the bucket. By default this is not set. e.g \d{9}.json would exclude all files ending with 9 numbers and .json</td></tr>
 </table>
